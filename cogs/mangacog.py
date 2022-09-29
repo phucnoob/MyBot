@@ -6,7 +6,7 @@ from discord.ext import tasks
 from discord.ext import commands
 
 from dotenv import load_dotenv
-from manga.servers import Server  # pylint: disable=maybe-no-member
+from manga.servers import Server  # pylint: disable=import-error
 from manga.servers.nettruyen import Nettruyen
 
 load_dotenv(".env")
@@ -21,12 +21,12 @@ class MangaCog(commands.Cog):
 
     async def cog_load(self):
         self.server: Server = Nettruyen()
-        self.spamn.start()  # pylint: disable=maybe-no-member
+        # self.spamn.start()  # pylint: disable=maybe-no-member
         print("Manga cogs ok.")
 
-    @tasks.loop(seconds=5)
-    async def spamn(self):
-        print("Me..")
+    # @tasks.loop(seconds=5)
+    # async def spamn(self):
+    #     print("Me..")
 
     def make_embed(self, data: dict):
         embed = discord.Embed(

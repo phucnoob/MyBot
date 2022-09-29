@@ -9,17 +9,19 @@ load_dotenv(".env")
 
 TOKEN = os.getenv("BOT_TOKEN")
 SERVER_ID = os.getenv("SERVER_ID")
+BOT_ID = os.getenv("BOT_ID")
 
 
 class MyBot(commands.Bot):
     def __init__(self) -> None:
         intents = discord.Intents.default()
         intents.message_content = True
-        super().__init__(command_prefix="$", intents=intents, )
+        super().__init__(command_prefix="$", intents=intents, application_id=BOT_ID)
 
         self.initial_extensions = [
             'cogs.help',
             'cogs.mangacog',
+            'cogs.youtubecog'
             # 'cogs.bar',
         ]
 
