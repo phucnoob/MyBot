@@ -7,4 +7,4 @@ RUN pip install -r requirements.txt
 
 COPY . /bot
 
-CMD python bot.py
+CMD python bot_run.py
