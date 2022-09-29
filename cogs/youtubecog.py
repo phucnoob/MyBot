@@ -149,4 +149,4 @@ class YoutubeCog(commands.Cog):
 
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(YoutubeCog(bot), guilds=[discord.Object(id=SERVER_ID), ])
+    await bot.add_cog(YoutubeCog(bot))

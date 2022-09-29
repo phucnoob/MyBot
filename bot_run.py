@@ -32,7 +32,7 @@ class MyBot(commands.Bot):
         # self.session = None
         for ext in self.initial_extensions:
             await self.load_extension(ext)
-        await self.tree.sync(guild=discord.Object(id=SERVER_ID))
+        await self.tree.sync()
 
     async def on_ready(self):
         await self.wait_until_ready()
