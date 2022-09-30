@@ -34,7 +34,7 @@ class MyBot(commands.Bot):
             await self.load_extension(ext)
         # self.tree.copy_global_to(guild=discord.Object(id=SERVER_ID))
         if not self.synced:
-            await self.tree.sync(guild=discord.Object(id=SERVER_ID))
+            await self.tree.sync()
 
     async def on_ready(self):
         await self.wait_until_ready()
