@@ -1,12 +1,13 @@
 import asyncio
 import os
 from collections import deque
+from urllib.parse import urlparse
 
 import discord
 from discord import FFmpegPCMAudio, app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
-from pytube import YouTube
+from pytube import YouTube, Search
 
 load_dotenv(".env")
 SERVER_ID = os.getenv("SERVER_ID")
@@ -59,11 +60,13 @@ class YoutubeCog(commands.Cog):
         description="Skip current song."
     )
     async def skip(self, interaction: discord.Interaction):
+        print("skip")
         # self.player._player.after = None
+        skiped_song = self.current_song.title
         self.player.stop()
         await interaction.response.defer()
-        await interaction.followup.send(f"Skip {self.current_song.title}")
-        await self.handle_play(interaction)
+        await interaction.followup.send(f"Skip {skiped_song}")
+        # await self.handle_play(interaction)
 
     @app_commands.command(
         name="list",
@@ -78,26 +81,28 @@ class YoutubeCog(commands.Cog):
             description += f"{count}. {song.title}\n\n"
             if count > MAX_LIST:
                 break
-
+        description = "No song in queue" if description == "" else description
         embed = discord.Embed(color=0x3498db, description=description)
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(
         name="play",
-        description="Play youtube url"
+        description="Play youtube music"
     )
-    async def play(self, interaction: discord.Interaction, url: str):
+    @app_commands.describe(
+        url_or_query="youtube url or query"
+    )
+    async def play(self, interaction: discord.Interaction, url_or_query: str):
         if interaction.user.voice:
+            await interaction.response.defer(ephemeral=True)
+            y_tube = await self.async_wrapper(lambda: self.get_youtube_object(url_or_query))
+            title = await self.async_wrapper(lambda: y_tube.title)
 
-            yt = YouTube(url)
-            title = await self.bot.loop.run_in_executor(None, lambda: yt.title)
-
-            self.queue.append(yt)
+            self.queue.append(y_tube)
             if self.player is not None and self.player.is_playing():
-                await interaction.response.send_message(f"Add {title} to queue.")
+                await interaction.followup.send(f"Add {title} to queue.")
                 await interaction.followup.send(f"{len(self.queue)} songs in the queue.")
             else:
-                await interaction.response.defer()
                 await self.handle_play(interaction)
         else:
             await interaction.response.send_message("Please join a voice chanel.")
@@ -129,6 +134,7 @@ class YoutubeCog(commands.Cog):
         return voice_client
 
     async def handle_play(self, interaction: discord.Interaction):
+        print("handle_play")
         yt = self.queue.popleft()
         if yt is None:
             return
@@ -146,6 +152,16 @@ class YoutubeCog(commands.Cog):
 
         await interaction.followup.send("Currently playing...")
         await interaction.followup.send(yt.watch_url)
+
+    def is_url(self, url) -> bool:
+        url_obj = urlparse(url)
+        return url_obj.scheme in ['http', 'https']
+
+    async def async_wrapper(self, func):
+        return await self.bot.loop.run_in_executor(None, func)
+
+    def get_youtube_object(self, url_or_query: str) -> YouTube:
+        return YouTube(url_or_query) if self.is_url(url_or_query) else Search(url_or_query).results[0]
 
 
 async def setup(bot: commands.Bot):

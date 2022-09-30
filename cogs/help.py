@@ -18,9 +18,10 @@ class HelpCog(commands.Cog):
         name="introduce",
         description="Testing command"
     )
-    async def introduce(self, interaction: discord.Interaction, name: str):
-        print(f"Hello {name}")
-        await interaction.response.send_message("Hello" + name)
+    @app_commands.describe(name_or_query="Your name, of course")
+    async def introduce(self, interaction: discord.Interaction, name_or_query: str):
+        print(f"Hello {name_or_query}")
+        await interaction.response.send_message("Hello " + name_or_query)
 
     @commands.command(name="normal")
     async def normal(self, context: commands.Context):
@@ -28,4 +29,4 @@ class HelpCog(commands.Cog):
 
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(HelpCog(bot), guilds=[discord.Object(id=SERVER_ID), ])
+    await bot.add_cog(HelpCog(bot))
