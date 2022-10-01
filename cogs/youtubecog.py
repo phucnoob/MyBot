@@ -94,7 +94,7 @@ class YoutubeCog(commands.Cog):
     )
     async def play(self, interaction: discord.Interaction, url_or_query: str):
         if interaction.user.voice:
-            await interaction.response.defer(ephemeral=True)
+            await interaction.response.defer()
             y_tube = await self.async_wrapper(lambda: self.get_youtube_object(url_or_query))
             title = await self.async_wrapper(lambda: y_tube.title)
 
@@ -136,6 +136,9 @@ class YoutubeCog(commands.Cog):
     async def handle_play(self, interaction: discord.Interaction):
         print("handle_play")
         yt = self.queue.popleft()
+
+        await interaction.followup.send("Currently playing...")
+        await interaction.followup.send(yt.watch_url)
         if yt is None:
             return
         self.current_song = yt  # backup metadata
@@ -149,9 +152,6 @@ class YoutubeCog(commands.Cog):
         voice_client.play(
             audio_obj,
             after=lambda e: asyncio.run_coroutine_threadsafe(self.handle_play(interaction), loop))
-
-        await interaction.followup.send("Currently playing...")
-        await interaction.followup.send(yt.watch_url)
 
     def is_url(self, url) -> bool:
         url_obj = urlparse(url)
